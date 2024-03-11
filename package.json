@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
+    "@tanstack/react-query": "^4.15.0",
+    "@tanstack/react-query-devtools": "^4.15.0",
+    "axios": "^1.6.7",
     "eslint-plugin-storybook": "^0.8.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.0",
@@ -19,6 +23,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.25",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",

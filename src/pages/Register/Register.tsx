@@ -6,6 +6,12 @@ import Input from '../../components/Input'
 // import { rules } from '../../utils/rules'
 import { schema, Schema } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useMutation } from '@tanstack/react-query'
+import { registerAccount } from '../../apis/auth.api'
+import { omit } from 'lodash'
+import { isAxiosUnprocessableEntityError } from '../../utils/utils'
+import { AxiosError } from 'axios'
+import { ResponseApi } from '../../types/utils.type'
 
 // interface FormData {
 //   email: string
@@ -26,23 +32,37 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
     getValues
   } = useForm<FormData>({
     resolver: yupResolver(schema)
   })
 
-  const rules = getRules(getValues)
+  const registerAccountMutation = useMutation({
+    mutationFn: (body: Omit<FormData, 'confirm_password'>) => registerAccount(body)
+  })
 
-  const onSubmit = handleSubmit(
-    (data) => {
-      console.log('data', data)
-    },
-    (data) => {
-      // const password = getValues('password')
-      // console.log('getValues', password)
-    }
-  )
+  // const rules = getRules(getValues)
+
+  const onSubmit = handleSubmit((data) => {
+    const body = omit(data, ['confirm_password'])
+    registerAccountMutation.mutate(body, {
+      onSuccess: (data) => {
+        console.log('data', data)
+      },
+      onError: (error) => {
+        const formErrors = error.response?.data.data
+        console.log('error=>', error.response?.data.data)
+        if (formErrors?.email) {
+          setError('email', {
+            type: 'Server',
+            message: formErrors.email
+          })
+        }
+      }
+    })
+  })
 
   console.log('errors', errors)
 
