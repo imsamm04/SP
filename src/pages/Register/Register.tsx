@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getRules } from '../../utils/rules'
-import Input from '../../components/Input'
+import Input from '../../components/Input/Input'
 // import { rules } from '../../utils/rules'
 import { schema, Schema } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -11,22 +11,18 @@ import { registerAccount } from '../../apis/auth.api'
 import { omit } from 'lodash'
 import { isAxiosUnprocessableEntityError } from '../../utils/utils'
 import { AxiosError } from 'axios'
-import { ResponseApi } from '../../types/utils.type'
-
-// interface FormData {
-//   email: string
-//   password: string
-//   confirm_password: string
-// }
-
+import { ErrorResponse, ResponseApi } from '../../types/utils.type'
+import { AppContext } from '../../contexts/app.context'
 type FormData = Pick<Schema, 'email' | 'password' | 'confirm_password'>
 
 export default function Register() {
+  const { setIsAuthenticated } = useContext(AppContext)
+  const navigate = useNavigate()
   interface FormData {
     email: string
     password: string
     confirm_password: string
-    name: string // Add the 'name' property to the FormData interface
+    // name: string // Add the 'name' property to the FormData interface
   }
 
   const {
@@ -48,17 +44,22 @@ export default function Register() {
   const onSubmit = handleSubmit((data) => {
     const body = omit(data, ['confirm_password'])
     registerAccountMutation.mutate(body, {
-      onSuccess: (data) => {
-        console.log('data', data)
+      onSuccess: () => {
+        setIsAuthenticated(true)
+        navigate('/')
       },
-      onError: (error) => {
-        const formErrors = error.response?.data.data
-        console.log('error=>', error.response?.data.data)
-        if (formErrors?.email) {
-          setError('email', {
-            type: 'Server',
-            message: formErrors.email
-          })
+
+      onError: (error: any) => {
+        if (isAxiosUnprocessableEntityError<ErrorResponse<Omit<FormData, 'confirm_password'>>>(error)) {
+          const formError = error.response?.data.data
+          if (formError) {
+            Object.keys(formError).forEach((key) => {
+              setError(key as keyof Omit<FormData, 'confirm_password'>, {
+                message: formError[key as keyof Omit<FormData, 'confirm_password'>],
+                type: 'Server'
+              })
+            })
+          }
         }
       }
     })
