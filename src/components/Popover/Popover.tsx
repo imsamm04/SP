@@ -81,7 +81,7 @@ interface Props {
 }
 
 export default function Popover({ children, className, renderPopover }: Props) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   const arrowRef = useRef<HTMLElement>(null)
   const { x, y, reference, floating, strategy, middlewareData } = useFloating({

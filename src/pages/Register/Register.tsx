@@ -13,10 +13,11 @@ import { isAxiosUnprocessableEntityError } from '../../utils/utils'
 import { AxiosError } from 'axios'
 import { ErrorResponse, ResponseApi } from '../../types/utils.type'
 import { AppContext } from '../../contexts/app.context'
+import Button from '../../components/Button'
 type FormData = Pick<Schema, 'email' | 'password' | 'confirm_password'>
 
 export default function Register() {
-  const { setIsAuthenticated } = useContext(AppContext)
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
   const navigate = useNavigate()
   interface FormData {
     email: string
@@ -44,8 +45,9 @@ export default function Register() {
   const onSubmit = handleSubmit((data) => {
     const body = omit(data, ['confirm_password'])
     registerAccountMutation.mutate(body, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsAuthenticated(true)
+        setProfile(data?.data.data.user)
         navigate('/')
       },
 
@@ -103,12 +105,13 @@ export default function Register() {
               autoComplete='on'
             />
             <div className='mt-3'>
-              <button
-                type='submit'
-                className='flex  w-full items-center justify-center bg-red-500 px-2 py-4 text-sm uppercase text-white hover:bg-red-600'
+              <Button
+                className='flex w-full items-center justify-center bg-red-500 py-4 px-2 text-sm uppercase text-white hover:bg-red-600'
+                isLoading={registerAccountMutation.isLoading}
+                disabled={registerAccountMutation.isLoading}
               >
                 Đăng ký
-              </button>
+              </Button>
             </div>
             <div className='mt-8 flex items-center justify-center'>
               <span className='text-gray-400'>Bạn chưa có tài khoản?</span>
