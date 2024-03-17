@@ -4,13 +4,15 @@ import { useMutation } from '@tanstack/react-query'
 import { useContext } from 'react'
 import { AppContext } from '../../contexts/app.context'
 import { logout } from '../../apis/auth.api'
+import path from '../../constans/path'
 
 export default function Header() {
-  const { setIsAuthenticated } = useContext(AppContext)
+  const { isAuthenticated, setIsAuthenticated, setProfile, profile } = useContext(AppContext)
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: () => {
       setIsAuthenticated(false)
+      setProfile(null)
     }
   })
   const handleLogout = () => {
@@ -62,26 +64,42 @@ export default function Header() {
           </Popover>
 
           <div className='flex items-center py-1 hover:text-gray-300 cursor-pointer'>
-            <div className='w-6 h-6 mr-2 flex-shrink-0 mx-2'>
-              <Popover
-                renderPopover={
-                  <div className='relative rounded-sm border border-gray-200 bg-white shadow-md'>
-                    <button
-                      onClick={handleLogout}
-                      className='block w-full bg-white py-3 px-4 text-left hover:bg-slate-100 hover:text-cyan-500'
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
-                }
-              >
-                <img
-                  src='https://down-vn.img.susercontent.com/file/b8f6435c4623d5bd4b0e0b58f9d52ccc_tn'
-                  alt=''
-                  className='w-full h-full object-cover rounded-full'
-                />
-              </Popover>
-            </div>
+            {isAuthenticated ? (
+              <div className='w-8 h-6 mr-2 flex-shrink-0 mx-2'>
+                <div>
+                  <Popover
+                    renderPopover={
+                      <div className='relative rounded-sm border border-gray-200 bg-white shadow-md'>
+                        <button
+                          onClick={handleLogout}
+                          className='block w-full bg-white py-3 px-4 text-left hover:bg-slate-100 hover:text-cyan-500'
+                        >
+                          Đăng xuất
+                        </button>
+                      </div>
+                    }
+                  >
+                    <img
+                      src='https://down-vn.img.susercontent.com/file/b8f6435c4623d5bd4b0e0b58f9d52ccc_tn'
+                      alt=''
+                      className='w-full h-full object-cover rounded-full'
+                    />
+                  </Popover>
+                </div>
+              </div>
+            ) : (
+              <div className='mr-2 flex-shrink-0 mx-2'>
+                <div className='flex items-center'>
+                  <Link className='mx-3 capitalize hover:text-white' to={path.register} rel='stylesheet'>
+                    Đăng ký
+                  </Link>
+                  <Link className='mx-3 capitalize hover:text-white' to={path.login} rel='stylesheet'>
+                    Đăng Nhập
+                  </Link>
+                </div>
+              </div>
+            )}
+            <div>{profile?.email}</div>
           </div>
         </div>
         <div className='grid grid-cols-12 gap-4 mt-4 items-end'>

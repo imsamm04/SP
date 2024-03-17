@@ -9,11 +9,13 @@ import Input from '../../components/Input/Input'
 import { isAxiosUnprocessableEntityError } from '../../utils/utils'
 import { ErrorResponse } from '../../types/utils.type'
 import { AppContext } from '../../contexts/app.context'
+import Button from '../../components/Button'
+import path from '../../constans/path'
 
 type FormData = Omit<Schema, 'confirm_password'>
 const loginSchema = schema.pick(['email', 'password'])
 export default function Login() {
-  const { setIsAuthenticated } = useContext(AppContext)
+  const { setIsAuthenticated, setProfile } = useContext(AppContext)
   const navigate = useNavigate()
 
   const {
@@ -31,8 +33,9 @@ export default function Login() {
 
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsAuthenticated(true)
+        setProfile(data?.data.data.user)
         navigate('/')
       },
       onError: (error: any) => {
@@ -77,16 +80,17 @@ export default function Login() {
               autoComplete='on'
             />
             <div className='mt-3'>
-              <button
-                type='submit'
-                className='flex  w-full items-center justify-center bg-red-500 px-2 py-4 text-sm uppercase text-white hover:bg-red-600'
+              <Button
+                className='flex w-full items-center justify-center bg-red-500 py-4 px-2 text-sm uppercase text-white hover:bg-red-600'
+                isLoading={loginMutation.isLoading}
+                disabled={loginMutation.isLoading}
               >
-                Đăng nhập
-              </button>
+                Đăng Nhập
+              </Button>
             </div>
             <div className='mt-8 flex items-center justify-center'>
               <span className='text-gray-400'>Bạn chưa có tài khoản?</span>
-              <Link to='/register' className='ml-1 text-red-400'>
+              <Link to= {path.register} className='ml-1 text-red-400'>
                 Đăng ký
               </Link>
             </div>
